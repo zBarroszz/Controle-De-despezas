@@ -9,6 +9,9 @@ sleep(0.5)
 
 dividas = []
 saldo_usuario = 0.0
+cont_dividas = 0
+soma_dividas = 0
+valor_pago = 0
 # PRÓXIMO PASSO:
 # Futuramente, podemos criar outras listas ou estruturas
 # para armazenar pagamentos realizados e histórico financeiro.
@@ -49,6 +52,7 @@ def mostrar_menu():
 # 3. FUNÇÃO DE CADASTRO
 
 def cadastrar_divida():
+    global cont_dividas
     nome_divida = input('Informe o título da sua dívida: ')
 
     valor_divida = float(input('Qual o valor total da sua dívida: '))
@@ -67,11 +71,13 @@ def cadastrar_divida():
               'Parcelas': qnt_parcelas,
               'Valor das parcelas': vlr_parcelas,
               'Vencimento': vencimento,
-              'Tipo': ctg_divida
-              }
+              'Tipo': ctg_divida,
+              'Valor restante': valor_divida,
+             }
 
     dividas.append(divida)
     print('\nDívida cadastrada com sucesso!')
+    cont_dividas += 1
 
     # MELHORIAS FUTURAS:
     # 1. Validar valores negativos ou iguais a zero.
@@ -92,14 +98,14 @@ def consultar_divida():
         else:
             for divida in dividas:
                 
-                print(f"ID: {divida['ID']} -=-=-=-=-=- {divida['Nome da Divida']} -=-=-=-=-= R${divida['Valor total']:.2f}")
+                print(f"ID: {divida['ID']} -=-=-=-=-=- {divida['Nome da Divida']} -=-=-=-=-= R${divida['Valor restante']:.2f}")
                    
                 sleep(0.3)
-            escolha_saida = int(input('Oque você deseja fazer?\n[0] Verificar divida ID\n[1] Voltar ao menu principal\nEscolha: '))
-            if escolha_saida == 1:
+            escolha_saida = int(input('Oque você deseja fazer?\n[1] Verificar divida ID\n[0] Voltar ao menu principal\nEscolha: '))
+            if escolha_saida == 0:
                 sleep(1)
                 break
-            elif escolha_saida == 0:
+            elif escolha_saida == 1:
                 programa = True
                 while programa:
                     try:    
@@ -200,6 +206,7 @@ def editar_divida():
 
 #FUNÇÃO DE REMOVER DIVIDA        
 def remover_divida():
+    global cont_dividas
     print('REMOVER DIVIDAS')
     sleep(0.5)
     
@@ -216,6 +223,7 @@ def remover_divida():
                 dividas.remove(divida)
                 print(f'Divida {divida['Nome da Divida']} removida com sucesso!! ')
                 sleep(1)
+                cont_dividas -= 1
                 break
         else:
             print('ID NAO ENCONTRADO!!\n\n')
@@ -228,6 +236,8 @@ def remover_divida():
 #FUNÇÃO DE REGISTRAR PAGAMENTO
 def registrar_pagamento():
     global saldo_usuario
+    global valor_pago
+    global valor_pagar
     print('============ REGISTRAR PAGAMENTO ============')
     sleep(1)
     continuar = True
@@ -238,9 +248,9 @@ def registrar_pagamento():
                 for divida in dividas:
                     print('=======================================')
                     sleep(0.3)
-                    print(f'ID: {divida['ID']} || NOME: {divida['Nome da Divida']} || VALOR TOTAL: R${divida['Valor total']:.2f} ||')
+                    print(f'ID: {divida['ID']} || NOME: {divida['Nome da Divida']} || VALOR TOTAL: R${divida['Valor restante']:.2f} ||')
                     sleep(0.5)
-                    print(f'\nSeu Saldo: R${saldo_usuario:.2f} \n')
+                print(f'\nSeu Saldo: R${saldo_usuario:.2f} \n')
                     
                 escolha_opcao = int(input('Oque deseja fazer?\n[0] Voltar ao menu\n[1] Registrar um pagamento\nEscolha:'))
 
@@ -268,27 +278,103 @@ def registrar_pagamento():
                                     print('Valores negativos não são validos!!')
 
                                 else:
-                                    saldo_usuario -= valor_pagar
-                                    divida['Valor total'] -= valor_pagar
+                                    
+                                    divida['Valor restante'] -= valor_pagar
                                     sleep(0.5)
                                     print('Alterando divida...')
                                     sleep(0.5)
+                                    saldo_usuario -= valor_pagar
+                                    valor_pago += valor_pagar 
                                     print(f'Divida alterada com sucesso!, seu saldo agora é de R${saldo_usuario:.2f}')
+                                if divida['Valor restante'] <= 0:
+                                    dividas.remove(divida)    
                                     break
                             else:
                                 print(f'Saldo insuficiente para realizar este pagamento, seu saldo é de R${saldo_usuario:.2f}')
                                 sleep(0.5)
                     
-                    else:
-                        print('ID NAO ENCONTRADO')
-                        sleep(0.5)
-                    
+                else:
+                    print('ID NAO ENCONTRADO')
+                    sleep(0.5)
+                
             else:
                 print('Nenhuma divida encontrada!')
                 sleep(0.5)
                 return
         except ValueError:
             print('Digite um valor valido!')
+
+#Função de consultar saldo
+def consultar_saldo():
+    global saldo_usuario
+    print('=================== CONSULTAR SALDO ====================')
+    sleep(0.5)
+    print(f'Seu saldo atual é de R${saldo_usuario:.2f}')
+    sleep(0.3)
+    while True:
+        try:
+            escolha = int(input('Oque deseja fazer?\n[0] Voltar ao menu\n[1] Alterar saldo\n\nEscolha: '))
+            if escolha == 0:
+                print('Voltando ao menu........')
+                sleep(0.5)
+                break
+            elif escolha == 1:
+                novo_saldo = float(input('Digite o valor que deseja: '))
+                if novo_saldo <0:
+                    print('Valores negativos não são validos, tente outro valor!')
+                else:    
+                    saldo_usuario = novo_saldo + saldo_usuario
+                    sleep(1)
+                    print('Um momento, alterando...')
+                    sleep(0.3)
+                    print(f'Valor alterado com sucesso, seu saldo agora é de R${saldo_usuario:.2f}')
+                    sleep(0.5)
+
+            else:
+                print('Digite um valor entre 0 e 1 por favor!')
+                   
+        
+        
+        
+        except ValueError:
+            print('Digite um valor valido por favor!')
+            sleep(0.5)
+
+#Funçao de resumo financeiro
+def resumo_financeiro():
+    global valor_pago
+    global soma_dividas
+    print('=============== RESUMO FINANCEIRO ===============')
+    sleep(0.5)
+    if not dividas:
+        print('Nenhuma divida encontrada!!')
+        sleep(1)
+        
+    else:    
+        
+        print(f'Total de dividas: {cont_dividas} dividas pendentes! ')
+        for divida in dividas:
+            
+            sleep(0.3)
+            print('........')
+            sleep(0.3)
+            print(f'ID: {divida['ID']}  ||  {divida['Nome da Divida']}   ||   R${divida['Valor total']:.2f}')
+            sleep(0.2)
+            soma_dividas += divida['Valor restante']
+        print(f'O valor total de todas as dividas encontradas somadas dão R${soma_dividas:.2f}')
+        sleep(0.5)
+        print(f'Teu saldo atual é de R${saldo_usuario:.2f}!')
+        sleep(0.2)
+        print(f'Você ja pagou R${valor_pago:.2f}')
+        escolha_saida = int(input('Voltar ao menu[0]: '))
+        if escolha_saida == 0:
+            print('Voltando ao menu.......')
+            sleep(1)
+            return 
+        else:
+            print('Digite um valor valido por favor!!')
+            sleep(0.5)
+
 
 #. FLUXO PRINCIPAL
 
@@ -306,7 +392,7 @@ while True:
         editar_divida()
    
     elif opcao == 4:
-        remover_divida()
+        remover_divida()    
    
     # PRÓXIMOS PASSOS:
     # [3] Criar função editar_divida(). CONCLUIDO
@@ -317,6 +403,13 @@ while True:
     # [8] Criar função sugestoes_financeiras().
     elif opcao == 5:
         registrar_pagamento()
+
+    elif opcao == 6:
+        consultar_saldo() 
+
+    elif opcao == 7:
+        resumo_financeiro()   
+    
     elif opcao == 0:
         print('Encerrando o programa...')
         break
